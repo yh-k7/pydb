@@ -14,6 +14,16 @@ def set_time_range(days=1):
     return start, end
 
 
+def set_date_range_list(days=1):
+    today = datetime.now()
+    date_list = []
+    for i in range(1, days + 1):
+        start = today - timedelta(days=i)
+        end = today - timedelta(days=i-1)
+        date_list.append((start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")))
+    return date_list
+
+
 def now_datetime():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

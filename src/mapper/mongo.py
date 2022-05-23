@@ -56,11 +56,11 @@ class mongo(object):
     def select_many(self, columns: dict, collection: str, filters: dict, odc: int = 1000, s_cnt: int = 0) -> list:
         """
         fillers, columns 조건으로 MongoDB 검색 결과 반환
-        :param columns: column names
-        :param filters: select option
+        :param columns: list, column names
         :param collection: Collection name of MongoDB DB
-        :param odc: limit count, 한번에 불러올 데이터의 갯수
-        :param s_cnt: start data index
+        :param filters: dict, select option
+        :param odc: int, limit count, 한번에 불러올 데이터의 갯수
+        :param s_cnt: int, start data index
         :return: list
         """
         columns = dict([(_, 1) for _ in columns])
@@ -68,12 +68,11 @@ class mongo(object):
         cursor = self.cursor[collection]
 
         try:
-            rc_cnt = 0
+            cnt = 0
             len_cnt = s_cnt
             res = []
 
-            while len_cnt == s_cnt:
-                print(len_cnt)
+            while len_cnt == odc:
                 temp_data = cursor.find(filters,
                                         projection=columns,
                                         no_cursor_timeout=True).skip(s_cnt).limit(odc)
@@ -82,7 +81,7 @@ class mongo(object):
                 res.extend(temp_data)
                 del temp_data
                 cnt += 1
-                rc_cnt = rc_cnt + s_cnt
+                s_cnt += odc
 
             print("총 데이터 수:", len(res))
         except Exception as e:

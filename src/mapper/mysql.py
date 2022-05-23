@@ -27,7 +27,7 @@ class mysql:
             print(e)
 
     def __del__(self):
-        self.cursor.close()
+        # self.cursor.close()
         self.conn.close()
 
     def select(self, columns: list, table_name: str, where: str) -> list:
@@ -50,14 +50,13 @@ class mysql:
         :param table_name: str, table
         :param where: st, select option
         :param odc: int, limit count, 한번에 불러올 데이터의 갯수
-        :param s_cnt: int
+        :param s_cnt: int, start data index
         :return: list
         """
         try:
             query = f'SELECT {", ".join(columns)} FROM {table_name}'
             if where:
                 query += f' WHERE {where}'
-            print(query)
 
             cnt = 0
             len_cnt = odc
