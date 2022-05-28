@@ -27,28 +27,41 @@ class mysql:
             print(e)
 
     def __del__(self):
-        # self.cursor.close()
+        if self.cursor:
+            self.cursor.close()
         self.conn.close()
 
     def select(self, columns: list, table_name: str, where: str) -> list:
+        """
+        셀렉 쿼리 생성
+        :param columns: list, column names
+        :param table_name: str, table
+        :param where: str, select option
+        :return:
+        """
         try:
             query = f'SELECT {", ".join(columns)} FROM {table_name}'
             if where:
                 query += f' WHERE {where}'
-            print(query)
+
+            if self.debug:
+                print(query)
+
             self.cursor.execute(query)
             res = self.cursor.fetchall()
-            print(res)
+
+            if self.debug:
+                print(res[:5])
         except Exception as e:
             print(f'exec_fetchall error: {e}')
         return res
 
     def select_many(self, columns: list, table_name: str, where: str, odc: int = 2000, s_cnt: int = 0) -> list:
         """
-
+        리밋을 이용한 셀렉 쿼리 생성
         :param columns: list, column names
         :param table_name: str, table
-        :param where: st, select option
+        :param where: str, select option
         :param odc: int, limit count, 한번에 불러올 데이터의 갯수
         :param s_cnt: int, start data index
         :return: list
@@ -78,36 +91,44 @@ class mysql:
             print(f'exec_fetchall error: {e}')
         return res
 
-    def exec_fetchall(self, query, *args) -> list:
+    def exec_query(self, query, *args):
+        """
+        삽입, 수정, 삭제 쿼리 실행.
+        :param query:
+        :param args:
+        """
         try:
             if args:
                 query = query.replace("%s", "\'%s\'")
-                sql = "{}".format(query) % args
-                if self.debug:
-                    print(sql)
-                result = self.cursor.execute(sql)
-            else:
-                if self.debug:
-                    print(query)
-                result = self.cursor.execute(query)
-            result = result.fetchall()
-        except Exception as e:
-            print(f'exec_fetchall error: {e}')
-        return result
+                query = "{}".format(query) % args
 
-    def exec_auto_commit(self, query, *args):
-        try:
-            if args:
-                query = query.replace("%s", "\'%s\'")
-                sql = "{}".format(query) % args
-                if self.debug:
-                    print(sql)
-                self.cursor.execute(sql)
-            else:
-                if self.debug:
-                    print(query)
-                self.cursor.execute(query)
-            # self.cursor.commit()
+            if self.debug:
+                print(query)
+
+            self.cursor.execute(query)
         except Exception as e:
             print(f'exec_auto_commit error: {e}')
-        return
+
+    def commit(self):
+        """
+        커밋
+        """
+        self.conn.commit()
+
+    def exec_auto_commit(self, query, *args):
+        """
+
+        :param query:
+        :param args:
+        :return:
+        """
+        try:
+            if args:
+                query = query.replace("%s", "\'%s\'")
+                query = "{}".format(query) % args
+            if self.debug:
+                print(query)
+            self.cursor.execute(query)
+            self.conn.commit()
+        except Exception as e:
+            print(f'exec_auto_commit error: {e}')
